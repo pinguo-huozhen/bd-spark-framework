@@ -6,6 +6,9 @@ import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 trait SparkJob {
+  //default to china
+  System.setProperty("user.timezone", "Asia/Shanghai")
+
   protected val logger: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
   protected def createSparkConf(config: Config): SparkConf = {
