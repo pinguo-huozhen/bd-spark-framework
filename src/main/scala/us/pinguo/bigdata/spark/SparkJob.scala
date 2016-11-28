@@ -24,13 +24,16 @@ trait SparkJob {
     conf
   }
 
-  protected def createContext(conf: SparkConf): SparkContext = {
+  protected def createContext(conf: SparkConf, awsId: String = "", awsKey: String = ""): SparkContext = {
     var submittedConf = "spark submitted with follow configuration:\n"
     conf.getAll foreach { case (k, v) =>
       submittedConf += s"$k -> $v\n"
     }
     logger.info(submittedConf)
-    new SparkContext(conf)
+    val context = new SparkContext(conf)
+    context.hadoopConfiguration.set("fs.s3.awsAccessKeyId", awsId)
+    context.hadoopConfiguration.set("fs.s3.awsSecretAccessKey", awsKey)
+    context
   }
 
   protected def createStream(conf: SparkConf, seconds: Duration = Seconds(30)) = new StreamingContext(conf, seconds)
