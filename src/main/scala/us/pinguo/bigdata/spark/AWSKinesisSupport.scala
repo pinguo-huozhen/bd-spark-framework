@@ -39,8 +39,8 @@ object AWSKinesisSupport {
         )
         client.putRecords(request).getRecords.toIterator
       }
-
     }
+
   }
 
 }
