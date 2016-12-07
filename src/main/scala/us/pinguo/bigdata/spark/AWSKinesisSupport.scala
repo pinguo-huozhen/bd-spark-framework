@@ -23,9 +23,12 @@ object AWSKinesisSupport {
       * @param streamName  kinesis stream name
       * @return a RDD with all PutRecordsResultEntry object
       */
-    def saveToKinesis(streamName: String, region: Regions = Regions.US_EAST_1, credentials: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain()): RDD[PutRecordsResultEntry] = {
+    def saveToKinesis(streamName: String, region: Regions = Regions.US_EAST_1, awsAccessCredentials: Option[(String, String)] = None): RDD[PutRecordsResultEntry] = {
       rdd.mapPartitions { rows =>
-        val client = new AmazonKinesisClient(credentials)
+        val client = awsAccessCredentials match {
+          case Some(accessCredentials) => new AmazonKinesisClient(new BasicAWSCredentials(accessCredentials._1, accessCredentials._2))
+          case None => new AmazonKinesisClient(new DefaultAWSCredentialsProviderChain())
+        }
         client.setRegion(Region.getRegion(region))
         val request = new PutRecordsRequest()
         request.setStreamName(streamName)
