@@ -2,7 +2,7 @@ package us.pinguo.bigdata.spark
 
 import java.nio.ByteBuffer
 
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, BasicAWSCredentials, DefaultAWSCredentialsProviderChain}
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.model.{PutRecordsRequest, PutRecordsRequestEntry, PutRecordsResultEntry}
@@ -13,19 +13,19 @@ import scala.collection.JavaConversions._
 
 object AWSKinesisSupport {
 
-  implicit class RDDWithKinesisSupport[T](rdd: RDD[(String, Array[Byte])]) {
+  implicit class RDDWithKinesisSupport(rdd: RDD[(String, Array[Byte])]) {
+
     /**
       * try put result to kinesis, this is a transform not action, should process record put result and all failed should be handled
       *
-      * @param awsAccessKey    aws account be used
-      * @param awsAccessSecret aws account be used
-      * @param region          kinesis stream aws region
-      * @param streamName      kinesis stream name
+      * @param credentials aws credentials be used
+      * @param region      kinesis stream aws region
+      * @param streamName  kinesis stream name
       * @return a RDD with all PutRecordsResultEntry object
       */
-    def saveToKinesis(awsAccessKey: String, awsAccessSecret: String, region: Regions, streamName: String): RDD[PutRecordsResultEntry] = {
+    def saveToKinesis(streamName: String, region: Regions = Regions.US_EAST_1, credentials: AWSCredentialsProvider = new DefaultAWSCredentialsProviderChain()): RDD[PutRecordsResultEntry] = {
       rdd.mapPartitions { rows =>
-        val client = new AmazonKinesisClient(new BasicAWSCredentials(awsAccessKey, awsAccessSecret))
+        val client = new AmazonKinesisClient(credentials)
         client.setRegion(Region.getRegion(region))
         val request = new PutRecordsRequest()
         request.setStreamName(streamName)
