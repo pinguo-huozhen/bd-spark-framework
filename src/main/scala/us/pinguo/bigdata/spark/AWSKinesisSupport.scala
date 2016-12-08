@@ -67,14 +67,14 @@ object AWSKinesisSupport {
         KinesisUtils.createStream(
           ssc,
           applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK_SER_2,
+          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK,
           (record: Record) => record
         )
       } else {
         KinesisUtils.createStream(
           ssc,
           applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK_SER_2,
+          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK,
           (record: Record) => record,
           kinesisAccessKey.get, kinesisAccessSecret.get
         )
