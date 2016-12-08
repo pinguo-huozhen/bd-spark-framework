@@ -30,17 +30,18 @@ object AWSKinesisSupport {
           case None => new AmazonKinesisClient(new DefaultAWSCredentialsProviderChain())
         }
         client.setRegion(Region.getRegion(region))
-        val request = new PutRecordsRequest()
-        request.setStreamName(streamName)
-        request.setRecords(
-          rows.map { case (partitionKey, raw) =>
-            val entry = new PutRecordsRequestEntry()
-            entry.setData(ByteBuffer.wrap(raw))
-            entry.setPartitionKey(partitionKey)
-            entry
-          }.toList.asJava
-        )
-        client.putRecords(request).getRecords.toIterator
+
+        rows.map { case (partitionKey, raw) =>
+          val entry = new PutRecordsRequestEntry()
+          entry.setData(ByteBuffer.wrap(raw))
+          entry.setPartitionKey(partitionKey)
+          entry
+        }.toList.grouped(100).map { groupedRecords =>
+          val request = new PutRecordsRequest()
+          request.setStreamName(streamName)
+          request.setRecords(groupedRecords.asJava)
+          client.putRecords(request).getRecords.toList
+        }.flatten
       }
     }
 
