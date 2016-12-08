@@ -2,14 +2,20 @@ package us.pinguo.bigdata.spark
 
 import java.nio.ByteBuffer
 
-import com.amazonaws.auth.{AWSCredentials, AWSCredentialsProvider, BasicAWSCredentials, DefaultAWSCredentialsProviderChain}
+import com.amazonaws.auth.{BasicAWSCredentials, DefaultAWSCredentialsProviderChain}
 import com.amazonaws.regions.{Region, Regions}
 import com.amazonaws.services.kinesis.AmazonKinesisClient
-import com.amazonaws.services.kinesis.model.{PutRecordsRequest, PutRecordsRequestEntry, PutRecordsResultEntry}
+import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionInStream
+import com.amazonaws.services.kinesis.model.{PutRecordsRequest, PutRecordsRequestEntry, PutRecordsResultEntry, Record}
+import com.typesafe.config.Config
+import org.apache.spark.api.java.StorageLevels
 import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.dstream.ReceiverInputDStream
+import org.apache.spark.streaming.kinesis.KinesisUtils
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object AWSKinesisSupport {
 
@@ -45,6 +51,35 @@ object AWSKinesisSupport {
       }
     }
 
+  }
+
+  implicit class SparkContextWithKinesis(ssc: StreamingContext) {
+
+    def kinesisStream(applicationName: String, kinesisConfig: Config): ReceiverInputDStream[Record] = {
+      val kinesisStream = kinesisConfig.getString("stream")
+      val kinesisEndpoint = kinesisConfig.getString("endpoint")
+      val kinesisRegion = kinesisConfig.getString("region")
+      val kinesisAccessKey = if (kinesisConfig.atKey("access-key").isEmpty) Some(kinesisConfig.getString("access-key")) else None
+      val kinesisAccessSecret = if (kinesisConfig.atKey("access-secret").isEmpty) Some(kinesisConfig.getString("access-secret")) else None
+      val kinesisIntervalCheckPoint = kinesisConfig.getLong("interval-check-point")
+
+      if (kinesisAccessKey.isEmpty && kinesisAccessSecret.isEmpty) {
+        KinesisUtils.createStream(
+          ssc,
+          applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
+          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK_SER_2,
+          (record: Record) => record
+        )
+      } else {
+        KinesisUtils.createStream(
+          ssc,
+          applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
+          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_AND_DISK_SER_2,
+          (record: Record) => record,
+          kinesisAccessKey.get, kinesisAccessSecret.get
+        )
+      }
+    }
   }
 
 }
