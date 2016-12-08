@@ -19,7 +19,7 @@ trait SparkJob {
     conf.set("spark.hadoop.mapred.output.compression.type", "BLOCK")
     conf.set("spark.dynamicAllocation.enabled", "false")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    conf.set("spark.kryoserializer.buffer.max", "2048m")
+    conf.set("spark.kryoserializer.buffer.max", "2000m")
     conf.set("spark.sql.shuffle.partitions", "400")
     conf
   }
