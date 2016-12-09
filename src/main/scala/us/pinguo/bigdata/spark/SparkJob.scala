@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import org.apache.log4j.Logger
 import org.apache.spark.streaming.{Duration, Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
+import scala.collection.JavaConversions._
 
 trait SparkJob {
   //default to china
@@ -20,9 +21,12 @@ trait SparkJob {
     conf.set("spark.dynamicAllocation.enabled", "false")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryoserializer.buffer.max", "1024m")
-    conf.set("spark.sql.shuffle.partitions", "400")
-    conf.set("spark.yarn.executor.memoryOverhead", "2048")
     conf.set("spark.executor.extraJavaOptions", "-XX:+DisableExplicitGC -XX:SurvivorRatio=1 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSCompactAtFullCollection -XX:CMSFullGCsBeforeCompaction=0 -XX:+CMSClassUnloadingEnabled -XX:LargePageSizeInBytes=128M -XX:+UseFastAccessorMethods -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=70 -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+PrintGCDetails -XX:+PrintGCTimeStamps")
+    if (config.hasPath("spark")) {
+      config.getConfig("spark").entrySet() foreach { configValue =>
+        conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
+      }
+    }
     conf
   }
 
