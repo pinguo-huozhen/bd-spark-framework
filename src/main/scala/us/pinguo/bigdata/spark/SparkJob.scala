@@ -38,8 +38,8 @@ trait SparkJob {
   }
 
   private def setAwsS3Access(awsId: String, awsKey: String, context: SparkContext) = {
-    context.hadoopConfiguration.set("fs.s3.awsAccessKeyId", awsId)
-    context.hadoopConfiguration.set("fs.s3.awsSecretAccessKey", awsKey)
+    context.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", awsId)
+    context.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", awsKey)
   }
 
   protected def createStream(conf: SparkConf, awsId: String = "", awsKey: String = "", seconds: Duration = Seconds(30)): StreamingContext = {
