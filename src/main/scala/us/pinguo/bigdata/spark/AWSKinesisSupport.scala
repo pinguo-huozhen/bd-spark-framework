@@ -55,7 +55,7 @@ object AWSKinesisSupport {
 
   implicit class SparkContextWithKinesis(ssc: StreamingContext) {
 
-    def kinesisStream(applicationName: String, kinesisConfig: Config): ReceiverInputDStream[Record] = {
+    def kinesisStream(applicationName: String, kinesisConfig: Config, initPositionType: InitialPositionInStream = InitialPositionInStream.TRIM_HORIZON): ReceiverInputDStream[Record] = {
       val kinesisStream = kinesisConfig.getString("stream")
       val kinesisEndpoint = kinesisConfig.getString("endpoint")
       val kinesisRegion = kinesisConfig.getString("region")
@@ -67,14 +67,14 @@ object AWSKinesisSupport {
         KinesisUtils.createStream(
           ssc,
           applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
+          initPositionType, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
           (record: Record) => record
         )
       } else {
         KinesisUtils.createStream(
           ssc,
           applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-          InitialPositionInStream.TRIM_HORIZON, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
+          initPositionType, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
           (record: Record) => record,
           kinesisAccessKey.get, kinesisAccessSecret.get
         )
