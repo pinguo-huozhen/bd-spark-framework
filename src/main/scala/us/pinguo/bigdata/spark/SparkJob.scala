@@ -22,8 +22,8 @@ trait SparkJob {
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryoserializer.buffer.max", "1024m")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:+PrintFlagsFinal -XX:+PrintReferenceGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -XX:+UnlockDiagnosticVMOptions -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35")
-    if (config.hasPath("spark")) {
-      config.getConfig("spark").entrySet() foreach { configValue =>
+    if (config.hasPath("runtime")) {
+      config.getConfig("runtime").entrySet() foreach { configValue =>
         conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
       }
     }
