@@ -10,7 +10,7 @@ import com.amazonaws.services.kinesis.model.{PutRecordsRequest, PutRecordsReques
 import com.typesafe.config.Config
 import org.apache.spark.api.java.StorageLevels
 import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.dstream.ReceiverInputDStream
+import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
 import org.apache.spark.streaming.kinesis.KinesisUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
@@ -55,7 +55,7 @@ object AWSKinesisSupport {
 
   implicit class SparkContextWithKinesis(ssc: StreamingContext) {
 
-    def kinesisStream(applicationName: String, kinesisConfig: Config, initPositionType: InitialPositionInStream = InitialPositionInStream.TRIM_HORIZON, parallel: Int = 4): ReceiverInputDStream[Record] = {
+    def kinesisStream(applicationName: String, kinesisConfig: Config, initPositionType: InitialPositionInStream = InitialPositionInStream.TRIM_HORIZON, parallel: Int = 4): DStream[Record] = {
       val kinesisStream = kinesisConfig.getString("stream")
       val kinesisEndpoint = kinesisConfig.getString("endpoint")
       val kinesisRegion = kinesisConfig.getString("region")
@@ -63,7 +63,7 @@ object AWSKinesisSupport {
       val kinesisAccessSecret = if (kinesisConfig.atKey("access-secret").isEmpty) Some(kinesisConfig.getString("access-secret")) else None
       val kinesisIntervalCheckPoint = kinesisConfig.getLong("interval-check-point")
 
-      val streams = 0 until 2 map { _ =>
+      val streams = 0 until parallel map { _ =>
         if (kinesisAccessKey.isEmpty && kinesisAccessSecret.isEmpty) {
           KinesisUtils.createStream(
             ssc,
