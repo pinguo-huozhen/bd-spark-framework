@@ -64,7 +64,7 @@ object AWSKinesisSupport {
       val kinesisInitialPositionInStream =
         (if (kinesisConfig.hasPath("initial-position-in-stream")) Some(kinesisConfig.getString("initial-position-in-stream")) else None) match {
           case Some(initialPosition) if initialPosition == "LATEST" => InitialPositionInStream.LATEST
-          case None => InitialPositionInStream.TRIM_HORIZON
+          case _ => InitialPositionInStream.TRIM_HORIZON
         }
       val kinesisIntervalCheckPoint = kinesisConfig.getLong("interval-check-point")
 
