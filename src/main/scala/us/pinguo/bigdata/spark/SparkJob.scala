@@ -12,8 +12,8 @@ trait SparkJob {
 
   protected val logger: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
-  protected def createSparkConf(config: Config): SparkConf = {
-    val conf = new SparkConf().setAppName(config.getString("application"))
+  protected def createSparkConf(applicationName:String, config: Config): SparkConf = {
+    val conf = new SparkConf().setAppName(applicationName)
     conf.set("spark.hadoop.mapred.output.compress", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec")

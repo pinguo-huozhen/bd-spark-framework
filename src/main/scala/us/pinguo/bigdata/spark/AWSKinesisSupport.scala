@@ -55,27 +55,33 @@ object AWSKinesisSupport {
 
   implicit class SparkContextWithKinesis(ssc: StreamingContext) {
 
-    def kinesisStream(applicationName: String, kinesisConfig: Config, initPositionType: InitialPositionInStream = InitialPositionInStream.TRIM_HORIZON, parallel: Int = 4): DStream[Record] = {
+    def kinesisStream(applicationName: String, kinesisConfig: Config): DStream[Record] = {
       val kinesisStream = kinesisConfig.getString("stream")
       val kinesisEndpoint = kinesisConfig.getString("endpoint")
       val kinesisRegion = kinesisConfig.getString("region")
       val kinesisAccessKey = if (kinesisConfig.atKey("access-key").isEmpty) Some(kinesisConfig.getString("access-key")) else None
       val kinesisAccessSecret = if (kinesisConfig.atKey("access-secret").isEmpty) Some(kinesisConfig.getString("access-secret")) else None
+      val kinesisReceivers = if (kinesisConfig.atKey("num-of-partitions").isEmpty) Some(kinesisConfig.getInt("num-of-partitions")) else None
+      val kinesisInitialPositionInStream =
+        (if (kinesisConfig.atKey("initial-position-in-stream").isEmpty) Some(kinesisConfig.getString("initial-position-in-stream")) else None) match {
+          case Some(initialPosition) if initialPosition == "LATEST" => InitialPositionInStream.LATEST
+          case None => InitialPositionInStream.TRIM_HORIZON
+        }
       val kinesisIntervalCheckPoint = kinesisConfig.getLong("interval-check-point")
 
-      val streams = 0 until parallel map { _ =>
+      val streams = 0 until kinesisReceivers.getOrElse(2) map { _ =>
         if (kinesisAccessKey.isEmpty && kinesisAccessSecret.isEmpty) {
           KinesisUtils.createStream(
             ssc,
             applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-            initPositionType, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
+            kinesisInitialPositionInStream, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
             (record: Record) => record
           )
         } else {
           KinesisUtils.createStream(
             ssc,
             applicationName, kinesisStream, kinesisEndpoint, kinesisRegion,
-            initPositionType, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
+            kinesisInitialPositionInStream, Seconds(kinesisIntervalCheckPoint), StorageLevels.MEMORY_ONLY_SER_2,
             (record: Record) => record,
             kinesisAccessKey.get, kinesisAccessSecret.get
           )
