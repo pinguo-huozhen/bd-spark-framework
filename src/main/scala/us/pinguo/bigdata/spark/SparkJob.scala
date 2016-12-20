@@ -16,7 +16,7 @@ trait SparkJob {
     val conf = new SparkConf().setAppName(applicationName)
     conf.set("spark.hadoop.mapred.output.compress", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "true")
-    conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec")
+    conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.SnappyCodec")
     conf.set("spark.hadoop.mapred.output.compression.type", "BLOCK")
     conf.set("spark.dynamicAllocation.enabled", "false")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
