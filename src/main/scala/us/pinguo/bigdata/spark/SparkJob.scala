@@ -12,16 +12,22 @@ trait SparkJob {
 
   protected val logger: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
-  protected def createSparkConf(applicationName:String, config: Config): SparkConf = {
+  protected def createSparkConf(applicationName: String, config: Config, enableDynamicAllocation: Boolean = false): SparkConf = {
     val conf = new SparkConf().setAppName(applicationName)
     conf.set("spark.hadoop.mapred.output.compress", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.SnappyCodec")
     conf.set("spark.hadoop.mapred.output.compression.type", "BLOCK")
-    conf.set("spark.dynamicAllocation.enabled", "false")
+
+    if (enableDynamicAllocation) {
+      conf.set("spark.dynamicAllocation.enabled", "true")
+      conf.set("spark.dynamicAllocation.schedulerBacklogTimeout", "3s")
+    }
+    else conf.set("spark.dynamicAllocation.enabled", "false")
+
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryoserializer.buffer.max", "1024m")
-    conf.set("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:+PrintFlagsFinal -XX:+PrintReferenceGC -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintAdaptiveSizePolicy -XX:+UnlockDiagnosticVMOptions -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35")
+    conf.set("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35 -XX:MaxGCPauseMillis=400")
     if (config.hasPath("runtime")) {
       config.getConfig("runtime").entrySet() foreach { configValue =>
         conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
