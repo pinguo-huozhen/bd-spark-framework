@@ -21,7 +21,10 @@ trait SparkJob {
 
     if (enableDynamicAllocation) {
       conf.set("spark.dynamicAllocation.enabled", "true")
-      conf.set("spark.dynamicAllocation.schedulerBacklogTimeout", "3s")
+      conf.set("spark.dynamicAllocation.schedulerBacklogTimeout", "15s")
+      conf.set("spark.dynamicAllocation.maxExecutors", "200")
+      conf.set("spark.dynamicAllocation.minExecutors", "1")
+
     }
     else conf.set("spark.dynamicAllocation.enabled", "false")
 
