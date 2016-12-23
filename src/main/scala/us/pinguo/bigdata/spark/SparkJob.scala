@@ -30,7 +30,7 @@ trait SparkJob {
 
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryoserializer.buffer.max", "1024m")
-    conf.set("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:+G1SummarizeConcMark -XX:InitiatingHeapOccupancyPercent=35 -XX:MaxGCPauseMillis=400")
+    conf.set("spark.executor.extraJavaOptions", "-XX:+UseG1GC -XX:InitiatingHeapOccupancyPercent=35 -XX:MaxGCPauseMillis=400")
     if (config.hasPath("runtime")) {
       config.getConfig("runtime").entrySet() foreach { configValue =>
         conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
