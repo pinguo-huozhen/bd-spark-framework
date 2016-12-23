@@ -58,6 +58,12 @@ trait SparkJob {
     context
   }
 
+  protected def createStreamWithSC(sc: SparkContext, awsId: String = "", awsKey: String = "", seconds: Duration = Seconds(30)): StreamingContext = {
+    val context = new StreamingContext(sc, seconds)
+    setAwsS3Access(awsId, awsKey, context.sparkContext)
+    context
+  }
+
   private def showCurrentConfiguration(conf: SparkConf) = {
     var submittedConf = "spark submitted with follow configuration:\n"
     conf.getAll foreach { case (k, v) =>
