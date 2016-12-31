@@ -16,7 +16,7 @@ trait SparkSupport {
 
   protected def createSparkConf(config: Config): (SparkConf, Config) = {
 
-    val finalConfig = ConfigFactory.parseResources("default-spark.conf").withFallback(config).resolve()
+    val finalConfig = config.withFallback(ConfigFactory.parseResources("default-spark.conf")).resolve()
 
     val sparkConf = new SparkConf().setAppName(finalConfig.getString("application"))
 
