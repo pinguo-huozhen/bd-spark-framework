@@ -14,17 +14,17 @@ trait SparkSupport {
 
   protected val logger: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
-  protected def createSparkConf(config: Config): SparkConf = {
+  protected def createSparkConf(config: Config): (SparkConf, Config) = {
 
     val finalConfig = ConfigFactory.parseResources("default-spark.conf").withFallback(config).resolve()
 
-    val conf = new SparkConf().setAppName(finalConfig.getString("application"))
+    val sparkConf = new SparkConf().setAppName(finalConfig.getString("application"))
 
     finalConfig.getConfig("runtime").entrySet() foreach { configValue =>
-      conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
+      sparkConf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
     }
 
-    conf
+    (sparkConf, finalConfig)
   }
 
   protected implicit class SparkStreaming(context: SparkContext) {
@@ -32,12 +32,12 @@ trait SparkSupport {
   }
 
   protected def createSpark(config: Config): (SparkSession, SparkContext) = {
-    val sparkConfig = createSparkConf(config)
+    val (sparkConfig, finalConfig) = createSparkConf(config)
     val session = SparkSession.builder().config(sparkConfig).getOrCreate()
     val context = session.sparkContext
-    if (sparkConfig.getString("hadoop.fs.s3n.awsAccessKeyId").nonEmpty) {
-      context.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", sparkConfig.getString("hadoop.fs.s3n.awsAccessKeyId"))
-      context.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", sparkConfig.getString("hadoop.fs.s3n.awsSecretAccessKey"))
+    if (finalConfig.getString("hadoop.fs.s3n.awsAccessKeyId").nonEmpty) {
+      context.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", finalConfig.getString("hadoop.fs.s3n.awsAccessKeyId"))
+      context.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", finalConfig.getString("hadoop.fs.s3n.awsSecretAccessKey"))
     }
     (session, context)
   }
