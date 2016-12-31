@@ -35,9 +35,9 @@ trait SparkSupport {
     val sparkConfig = createSparkConf(config)
     val session = SparkSession.builder().config(sparkConfig).getOrCreate()
     val context = session.sparkContext
-    if (config.getString("hadoop.fs.s3n.awsAccessKeyId").nonEmpty) {
-      context.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", config.getString("hadoop.fs.s3n.awsAccessKeyId"))
-      context.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", config.getString("hadoop.fs.s3n.awsSecretAccessKey"))
+    if (sparkConfig.getString("hadoop.fs.s3n.awsAccessKeyId").nonEmpty) {
+      context.hadoopConfiguration.set("fs.s3n.awsAccessKeyId", sparkConfig.getString("hadoop.fs.s3n.awsAccessKeyId"))
+      context.hadoopConfiguration.set("fs.s3n.awsSecretAccessKey", sparkConfig.getString("hadoop.fs.s3n.awsSecretAccessKey"))
     }
     (session, context)
   }
