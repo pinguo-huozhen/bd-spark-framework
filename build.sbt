@@ -8,7 +8,7 @@ lazy val `spark-framework` = (project in file("."))
   .settings(
     name := "spark-framework",
     organization := "us.pinguo.bigdata",
-    version := "0.1-SNAPSHOT",
+    version := "1.0-SNAPSHOT",
     scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.1",
