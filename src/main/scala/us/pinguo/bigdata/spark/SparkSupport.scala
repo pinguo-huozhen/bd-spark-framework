@@ -16,11 +16,11 @@ trait SparkSupport {
 
   protected def createSparkConf(config: Config): SparkConf = {
 
-    val finalConfig = ConfigFactory.load("default-spark.conf").withFallback(config).resolve()
+    val finalConfig = ConfigFactory.parseResources("default-spark.conf").withFallback(config).resolve()
 
     val conf = new SparkConf().setAppName(finalConfig.getString("application"))
 
-    config.getConfig("runtime").entrySet() foreach { configValue =>
+    finalConfig.getConfig("runtime").entrySet() foreach { configValue =>
       conf.set(configValue.getKey, configValue.getValue.unwrapped().asInstanceOf[String])
     }
 
