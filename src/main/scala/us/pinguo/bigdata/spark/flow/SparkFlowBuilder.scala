@@ -18,12 +18,15 @@ class SparkFlowBuilder {
   def flow = flows.reverse
 
 }
+
 object SparkFlowBuilder {
+
+  def apply(): SparkFlowBuilder = new SparkFlowBuilder()
 
   trait SparkFlowFunc {
     var useCache: Boolean = false
 
-    def setUseche(isCache: Boolean = false) = {
+    def setUseCache(isCache: Boolean = false) = {
       useCache = isCache
       this
     }
@@ -74,4 +77,5 @@ object SparkFlowBuilder {
       this
     }
   }
+
 }
