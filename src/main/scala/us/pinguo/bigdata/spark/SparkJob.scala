@@ -12,11 +12,11 @@ trait SparkJob {
 
   protected val logger: Logger = Logger.getLogger(this.getClass.getCanonicalName)
 
-  protected def createSparkConf(applicationName: String, config: Config, enableDynamicAllocation: Boolean = false): SparkConf = {
+  protected def createSparkConf(applicationName: String, config: Config, enableDynamicAllocation: Boolean = false, compress: String = SparkJob.COMPRESS_SNAPPY): SparkConf = {
     val conf = new SparkConf().setAppName(applicationName)
     conf.set("spark.hadoop.mapred.output.compress", "true")
     conf.set("spark.hadoop.mapred.output.compression.codec", "true")
-    conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.SnappyCodec")
+    conf.set("spark.hadoop.mapred.output.compression.codec", compress)
     conf.set("spark.hadoop.mapred.output.compression.type", "BLOCK")
 
     if (enableDynamicAllocation) {
@@ -71,4 +71,9 @@ trait SparkJob {
     }
     logger.info(submittedConf)
   }
+}
+
+object SparkJob {
+  final val COMPRESS_SNAPPY = "org.apache.hadoop.io.compress.SnappyCodec"
+  final val COMPRESS_GZIP = "org.apache.hadoop.io.compress.GzipCodec"
 }
