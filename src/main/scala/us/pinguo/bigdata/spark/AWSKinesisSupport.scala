@@ -28,7 +28,7 @@ object AWSKinesisSupport {
       * @param streamName  kinesis stream name
       * @return a RDD with all PutRecordsResultEntry object
       */
-    def saveToKinesis(streamName: String, region: Regions = Regions.US_EAST_1, awsAccessCredentials: Option[(String, String)] = None, batchSize: Int = 200  ): RDD[PutRecordsResult] = {
+    def saveToKinesis(streamName: String, region: Regions = Regions.US_EAST_1, awsAccessCredentials: Option[(String, String)] = None, batchSize: Int = 200): RDD[PutRecordsResult] = {
       rdd.mapPartitions { rows =>
         val client = awsAccessCredentials match {
           case Some(accessCredentials) => new AmazonKinesisClient(new BasicAWSCredentials(accessCredentials._1, accessCredentials._2))
@@ -54,21 +54,19 @@ object AWSKinesisSupport {
 
   implicit class SparkContextWithKinesis(ssc: StreamingContext) {
 
-    def kinesisStream(applicationName: String, kinesisConfig: Config): DStream[Record] = {
-      val kinesisStream = kinesisConfig.getString("stream")
-      val kinesisEndpoint = kinesisConfig.getString("endpoint")
-      val kinesisRegion = kinesisConfig.getString("region")
-      val kinesisAccessKey = if (kinesisConfig.hasPath("access-key")) Some(kinesisConfig.getString("access-key")) else None
-      val kinesisAccessSecret = if (kinesisConfig.hasPath("access-secret")) Some(kinesisConfig.getString("access-secret")) else None
-      val kinesisReceivers = if (kinesisConfig.hasPath("num-of-partitions")) Some(kinesisConfig.getInt("num-of-partitions")) else None
+    def kinesisStream(applicationName: String, kc: Config): DStream[Record] = {
+      val kinesisStream = kc.getString("stream")
+      val kinesisEndpoint = kc.getString("endpoint")
+      val kinesisRegion = kc.getString("region")
+      val kinesisAccessKey = if (kc.hasPath("access-key")) Some(kc.getString("access-key")) else None
+      val kinesisAccessSecret = if (kc.hasPath("access-secret")) Some(kc.getString("access-secret")) else None
+      val kinesisReceivers = if (kc.hasPath("num-of-partitions")) Some(kc.getInt("num-of-partitions")) else None
       val kinesisInitialPositionInStream =
-        (if (kinesisConfig.hasPath("initial-position-in-stream")) Some(kinesisConfig.getString("initial-position-in-stream")) else None) match {
-          case Some(initialPosition) if initialPosition == "LATEST" => InitialPositionInStream.LATEST
-          case _ => InitialPositionInStream.TRIM_HORIZON
-        }
-      val kinesisIntervalCheckPoint = kinesisConfig.getLong("interval-check-point")
+        if (kc.hasPath("initial-position-in-stream")) InitialPositionInStream.valueOf(kc.getString("initial-position-in-stream")) else InitialPositionInStream.TRIM_HORIZON
 
-      val streams = 0 until kinesisReceivers.getOrElse(2) map { _ =>
+      val kinesisIntervalCheckPoint = kc.getLong("interval-check-point")
+
+      val streams = 0 until kinesisReceivers.getOrElse(1) map { _ =>
         if (kinesisAccessKey.isEmpty && kinesisAccessSecret.isEmpty) {
           KinesisUtils.createStream(
             ssc,
