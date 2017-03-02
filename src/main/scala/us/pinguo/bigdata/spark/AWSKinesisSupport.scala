@@ -62,7 +62,8 @@ object AWSKinesisSupport {
       val kinesisAccessSecret = if (kc.hasPath("access-secret")) Some(kc.getString("access-secret")) else None
       val kinesisReceivers = if (kc.hasPath("num-of-partitions")) Some(kc.getInt("num-of-partitions")) else None
       val kinesisInitialPositionInStream =
-        if (kc.hasPath("initial-position-in-stream")) InitialPositionInStream.valueOf(kc.getString("initial-position-in-stream")) else InitialPositionInStream.TRIM_HORIZON
+        if (kc.hasPath("initial-position-in-stream")) InitialPositionInStream.valueOf(kc.getString("initial-position-in-stream"))
+        else InitialPositionInStream.TRIM_HORIZON
 
       val kinesisIntervalCheckPoint = kc.getLong("interval-check-point")
 
