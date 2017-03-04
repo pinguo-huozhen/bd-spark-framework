@@ -26,7 +26,7 @@ object SparkFlowBuilder {
   trait SparkFlowFunc {
     var useCache: Boolean = false
 
-    def setUseCache(isCache: Boolean = false) = {
+    def setUseCache(isCache: Boolean = false): SparkFlowFunc = {
       useCache = isCache
       this
     }
@@ -51,12 +51,12 @@ object SparkFlowBuilder {
     var reduceByKeyFunc: (Any, Any) => Any = _
     //var filterFunc: Option[Any => Boolean] = None
 
-    def map(f: Any => (String, Any)) = {
+    def map(f: Any => (String, Any)): ReduceByKeyFunc = {
       mapFunc = f
       this
     }
 
-    def reduce(f: (Any, Any) => Any) = {
+    def reduce(f: (Any, Any) => Any): ReduceByKeyFunc = {
       reduceByKeyFunc = f
       this
     }
@@ -66,14 +66,20 @@ object SparkFlowBuilder {
   case class OutputFunc(to: String) extends SparkFlowFunc {
     var mapFunc: Option[Any => String] = None
     var filterFunc: Option[Any => Boolean] = None
+    var outputFunc: Option[Any => Unit] = None
 
-    def map(f: Any => String) = {
+    def map(f: Any => String): OutputFunc = {
       mapFunc = Some(f)
       this
     }
 
-    def filter(f: Any => Boolean) = {
+    def filter(f: Any => Boolean): OutputFunc = {
       filterFunc = Some(f)
+      this
+    }
+
+    def output(f: Any => Unit): OutputFunc = {
+      outputFunc = Some(f)
       this
     }
   }

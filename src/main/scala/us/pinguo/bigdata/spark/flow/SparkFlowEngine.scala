@@ -80,25 +80,14 @@ object SparkFlowEngine {
     case func: OutputFunc =>
       var outputRDD = previousRDD.asInstanceOf[RDD[_]]
       func.filterFunc collect {
-        case filter => {
-
-          outputRDD = outputRDD.filter(filter)
-        }
+        case filter => outputRDD = outputRDD.filter(filter)
       }
       func.mapFunc collect {
-        case map => {
-          outputRDD = outputRDD.map(map)
-        }
+        case map => outputRDD = outputRDD.map(map)
+      }
+      func.outputFunc collect {
+        case output => output(outputRDD)
       }
 
-      outputRDD.saveAsTextFile(func.to)
-
-  }
-
-  def cost(name: String)(execute: => Any) = {
-    val start = System.currentTimeMillis()
-    execute
-    val time = System.currentTimeMillis() - start
-    println(s"FLOW STEP [$name] cost [$time]")
   }
 }
