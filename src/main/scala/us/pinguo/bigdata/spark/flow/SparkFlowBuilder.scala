@@ -64,7 +64,7 @@ object SparkFlowBuilder {
 
 
   case class OutputFunc(to: String) extends SparkFlowFunc {
-    var mapFunc: Option[Any => String] = None
+    var mapFunc: Option[Any => Any] = None
     var filterFunc: Option[Any => Boolean] = None
     var outputFunc: Option[Any => Unit] = None
 
