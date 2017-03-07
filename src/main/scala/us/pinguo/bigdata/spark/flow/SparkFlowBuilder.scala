@@ -68,7 +68,7 @@ object SparkFlowBuilder {
     var filterFunc: Option[Any => Boolean] = None
     var outputFunc: Option[Any => Unit] = None
 
-    def map(f: Any => String): OutputFunc = {
+    def map(f: Any => Any): OutputFunc = {
       mapFunc = Some(f)
       this
     }
