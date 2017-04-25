@@ -84,4 +84,19 @@ object SparkFlowBuilder {
     }
   }
 
+  case class OutputRDDFunc(key:String) extends SparkFlowFunc {
+    var mapFunc: Option[Any => Any] = None
+    var filterFunc: Option[Any => Boolean] = None
+
+    def map(f: Any => Any): OutputRDDFunc = {
+      mapFunc = Some(f)
+      this
+    }
+
+    def filter(f: Any => Boolean): OutputRDDFunc = {
+      filterFunc = Some(f)
+      this
+    }
+  }
+
 }

@@ -8,6 +8,7 @@ import us.pinguo.bigdata.spark.flow.SparkFlowBuilder.{SparkFlowFunc, _}
   * Created by jim on 2017/2/4.
   */
 object SparkFlowEngine {
+  private var outputRDDs = Map[String, RDD[_]]()
   private var previousRDD: Any = _
 
   def runFlow[T](rdd: RDD[_], flow: List[SparkFlowFunc]): RDD[T] = {
@@ -22,6 +23,8 @@ object SparkFlowEngine {
     )
     previousRDD.asInstanceOf[RDD[T]]
   }
+
+  def outputRDD(key: String): Option[RDD[_]] = outputRDDs.get(key)
 
   def process: PartialFunction[SparkFlowFunc, Any] = {
     case func: MapFunc => {
@@ -89,5 +92,14 @@ object SparkFlowEngine {
         case output => output(outputRDD)
       }
 
+    case func: OutputRDDFunc =>
+      var outputRDD = previousRDD.asInstanceOf[RDD[_]]
+      func.filterFunc collect {
+        case filter => outputRDD = outputRDD.filter(filter)
+      }
+      func.mapFunc collect {
+        case map => outputRDD = outputRDD.map(map)
+      }
+      outputRDDs += func.key -> outputRDD
   }
 }
