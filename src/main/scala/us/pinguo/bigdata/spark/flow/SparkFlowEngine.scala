@@ -24,6 +24,8 @@ object SparkFlowEngine {
     previousRDD.asInstanceOf[RDD[T]]
   }
 
+  def outputRDD(key: String): Option[RDD[_]] = outputRDDs.get(key)
+
   def process: PartialFunction[SparkFlowFunc, Any] = {
     case func: MapFunc => {
 

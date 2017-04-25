@@ -88,12 +88,12 @@ object SparkFlowBuilder {
     var mapFunc: Option[Any => Any] = None
     var filterFunc: Option[Any => Boolean] = None
 
-    def map(f: Any => Any): OutputFunc = {
+    def map(f: Any => Any): OutputRDDFunc = {
       mapFunc = Some(f)
       this
     }
 
-    def filter(f: Any => Boolean): OutputFunc = {
+    def filter(f: Any => Boolean): OutputRDDFunc = {
       filterFunc = Some(f)
       this
     }
