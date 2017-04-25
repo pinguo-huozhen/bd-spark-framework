@@ -8,7 +8,7 @@ import us.pinguo.bigdata.spark.flow.SparkFlowBuilder.SparkFlowFunc
 
 class SparkFlowBuilder {
 
-  var flows = List[SparkFlowFunc]()
+  var flows: List[SparkFlowFunc] = List[SparkFlowFunc]()
 
   def append(func: SparkFlowFunc): SparkFlowBuilder = {
     flows ::= func
